@@ -1,0 +1,11 @@
+[package]
+name = "contributors"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0.100"
+env = "1.0.1"
+git2 = "0.20.2"
+regex = "1.12.2"
+num-format = "0.4.4"
