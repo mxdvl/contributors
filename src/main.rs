@@ -28,11 +28,14 @@ fn main() -> anyhow::Result<()> {
         let mut opts = BlameOptions::new();
         opts.track_copies_same_commit_moves(true); // similar to -M
         let blame = repo.blame_file(Path::new(path), Some(&mut opts))?;
-        for h in blame.iter() {
-            let lines = h.lines_in_hunk() as u64;
-            let sig = h.final_signature();
+        for hunk in blame.iter() {
+            let lines = hunk.lines_in_hunk() as u64;
             // TODO: handle .mailmap files or other substitutions
-            let name = sig.name().unwrap_or("Unknown").to_string();
+            let name = hunk
+                .final_signature()
+                .name()
+                .unwrap_or("Unknown")
+                .to_string();
             *authors.entry(name).or_default() += lines;
             total += lines;
         }
