@@ -1,1 +1,5 @@
 /target
+
+# Flame graphs
+*.trace
+flamegraph.svg
