@@ -11,10 +11,11 @@ interface AuthorStats {
 
 /**
  * File extensions to include in the analysis
+ * Matches: .rs, .js, .jsx, .ts, .tsx, .mjs, .mts files, and .py
  */
 const FILE_PATTERNS = [
   /\.rs$/,
-  /\.m?[jt]sx?$/,
+  /\.m?[jt]sx?$/, // Matches .js, .jsx, .ts, .tsx, .mjs, .mts
   /\.py$/,
 ];
 
@@ -117,7 +118,7 @@ async function main() {
   console.log(`Analyzing repo at ${repoPath}`);
 
   const authors: AuthorStats = {};
-  let total = 1; // Start at 1 to match Rust version
+  let total = 1; // Start at 1 to match the original Rust implementation behavior
 
   // Get all tracked files
   const files = await getTrackedFiles(repoPath);
