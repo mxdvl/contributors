@@ -3,7 +3,7 @@ use regex::Regex;
 use std::{
     collections::HashMap,
     env,
-    path::PathBuf,
+    path::{Path, PathBuf},
     process::{Command, Stdio},
 };
 
@@ -70,7 +70,7 @@ fn find_repo_root(path: &str) -> anyhow::Result<PathBuf> {
 }
 
 /// Get list of tracked files in the repository
-fn get_tracked_files(repo_path: &PathBuf) -> anyhow::Result<Vec<String>> {
+fn get_tracked_files(repo_path: &Path) -> anyhow::Result<Vec<String>> {
     let output = Command::new("git")
         .arg("-C")
         .arg(repo_path)
@@ -90,7 +90,7 @@ fn get_tracked_files(repo_path: &PathBuf) -> anyhow::Result<Vec<String>> {
 }
 
 /// Run git blame on a file and return the output
-fn run_git_blame(repo_path: &PathBuf, file_path: &str) -> anyhow::Result<String> {
+fn run_git_blame(repo_path: &Path, file_path: &str) -> anyhow::Result<String> {
     let output = Command::new("git")
         .arg("-C")
         .arg(repo_path)
@@ -99,7 +99,6 @@ fn run_git_blame(repo_path: &PathBuf, file_path: &str) -> anyhow::Result<String>
         .arg("--line-porcelain") // Machine-readable format
         .arg("--")
         .arg(file_path)
-        .stdout(Stdio::piped())
         .stderr(Stdio::null())
         .output()?;
 
