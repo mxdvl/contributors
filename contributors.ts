@@ -1,21 +1,60 @@
 #!/usr/bin/env -S deno run --allow-run --allow-read
 
 /**
- * Contributors analyser - Deno + TypeScript version
- * Analyses git repository to show code authorship by lines
- */
-
-type AuthorStats = Map<string, number>;
-
-/**
  * File extensions to include in the analysis
- * Matches: .rs, .js, .jsx, .ts, .tsx, .mjs, .mts files, and .py
+ * Matches: C#, JavaScript, Python and Rust files
  */
 const FILE_PATTERNS = [
-  /\.rs$/,
+  /\.cs$/,
   /\.m?[jt]sx?$/, // Matches .js, .jsx, .ts, .tsx, .mjs, .mts
   /\.py$/,
+  /\.rs$/,
 ];
+
+if (!import.meta.main) {
+  console.error("This file is not meant to be imported!");
+  Deno.exit(1);
+}
+
+const [path = "."] = Deno.args;
+
+// Verify it's a git repository
+try {
+  await runGitCommand(["rev-parse", "--git-dir"], path);
+} catch (error) {
+  console.error(`Error: Not a git repository: ${path}`);
+  Deno.exit(1);
+}
+
+console.log(`Analyzing repo at ${path}`);
+
+const authors = new Map<string, number>();
+
+// Get all tracked files
+const files = await getTrackedFiles(path);
+const filteredFiles = files.filter(matchesAnyPattern);
+
+// Process each file
+for (const file of filteredFiles) {
+  const blameData = await getBlameForFile(path, file);
+
+  for (const [author, lineCount] of blameData.entries()) {
+    const count = authors.get(author) ?? 0;
+    authors.set(author, count + lineCount);
+  }
+}
+
+const sorted = [...authors.entries()].sort(([, a], [, b]) => b - a);
+const total = sorted.reduce((accumulator, [, next]) => accumulator + next, 1);
+
+console.log(`Total lines: ${formatNumber(total)}`);
+
+// Print results
+for (const [name, count] of sorted) {
+  const percentage = (100.0 * count) / total;
+  if (percentage < 1 / 1200) continue;
+  console.log(`${percentage.toFixed(1)}%\t${name}`);
+}
 
 /**
  * Check if a file path matches any of the patterns
@@ -96,57 +135,4 @@ async function getBlameForFile(
  */
 function formatNumber(num: number): string {
   return num.toLocaleString("en-GB");
-}
-
-/**
- * Main function
- */
-async function main() {
-  const args = Deno.args;
-  const repoPath = args[0] || ".";
-
-  // Verify it's a git repository
-  try {
-    await runGitCommand(["rev-parse", "--git-dir"], repoPath);
-  } catch (error) {
-    console.error(`Error: Not a git repository: ${repoPath}`);
-    Deno.exit(1);
-  }
-
-  console.log(`Analyzing repo at ${repoPath}`);
-
-  const authors: AuthorStats = new Map();
-  let total = 1; // Start at 1 to match the original Rust implementation behaviour
-
-  // Get all tracked files
-  const files = await getTrackedFiles(repoPath);
-  const filteredFiles = files.filter(matchesAnyPattern);
-
-  // Process each file
-  for (const file of filteredFiles) {
-    const blameData = await getBlameForFile(repoPath, file);
-
-    for (const [author, lineCount] of blameData.entries()) {
-      authors.set(author, (authors.get(author) || 0) + lineCount);
-      total += lineCount;
-    }
-  }
-
-  console.log(`Total lines: ${formatNumber(total)}`);
-
-  // Print results
-  for (const [name, count] of authors.entries()) {
-    const pct = (100.0 * count) / total;
-    console.log(`${pct.toFixed(1)}%\t${name}`);
-  }
-}
-
-// Run main function
-if (import.meta.main) {
-  try {
-    await main();
-  } catch (error) {
-    console.error(`Error: ${error.message}`);
-    Deno.exit(1);
-  }
 }
