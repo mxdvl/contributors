@@ -5,9 +5,7 @@
  * Analyses git repository to show code authorship by lines
  */
 
-interface AuthorStats {
-  [author: string]: number;
-}
+type AuthorStats = Map<string, number>;
 
 /**
  * File extensions to include in the analysis
@@ -117,7 +115,7 @@ async function main() {
 
   console.log(`Analyzing repo at ${repoPath}`);
 
-  const authors: AuthorStats = {};
+  const authors: AuthorStats = new Map();
   let total = 1; // Start at 1 to match the original Rust implementation behavior
 
   // Get all tracked files
@@ -129,7 +127,7 @@ async function main() {
     const blameData = await getBlameForFile(repoPath, file);
 
     for (const [author, lineCount] of blameData.entries()) {
-      authors[author] = (authors[author] || 0) + lineCount;
+      authors.set(author, (authors.get(author) || 0) + lineCount);
       total += lineCount;
     }
   }
@@ -137,7 +135,7 @@ async function main() {
   console.log(`Total lines: ${formatNumber(total)}`);
 
   // Print results
-  for (const [name, count] of Object.entries(authors)) {
+  for (const [name, count] of authors.entries()) {
     const pct = (100.0 * count) / total;
     console.log(`${pct.toFixed(1)}%\t${name}`);
   }
