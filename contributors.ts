@@ -116,7 +116,7 @@ async function main() {
   console.log(`Analyzing repo at ${repoPath}`);
 
   const authors: AuthorStats = new Map();
-  let total = 1; // Start at 1 to match the original Rust implementation behavior
+  let total = 1; // Start at 1 to match the original Rust implementation behaviour
 
   // Get all tracked files
   const files = await getTrackedFiles(repoPath);
