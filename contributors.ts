@@ -1,8 +1,8 @@
 #!/usr/bin/env -S deno run --allow-run --allow-read
 
 /**
- * Contributors analyzer - Deno + TypeScript version
- * Analyzes git repository to show code authorship by lines
+ * Contributors analyser - Deno + TypeScript version
+ * Analyses git repository to show code authorship by lines
  */
 
 interface AuthorStats {
@@ -97,7 +97,7 @@ async function getBlameForFile(
  * Format a number with thousands separators
  */
 function formatNumber(num: number): string {
-  return num.toLocaleString("en-US");
+  return num.toLocaleString("en-GB");
 }
 
 /**
